@@ -23,7 +23,13 @@ def shopSmart(orderList, fruitShops):
         fruitShops: List of FruitShops
     """    
     "*** YOUR CODE HERE ***"
-    return None
+    minCost = None
+    for c in fruitShops:
+        total = c.getPriceOfOrder(orderList)
+        if minCost is None or minCost > total:
+            minCost = total
+            bestShop = c
+    return bestShop
     
 if __name__ == '__main__':
   "This code runs when you invoke the script from the command line"
@@ -33,6 +39,6 @@ if __name__ == '__main__':
   dir2 = {'apples': 1.0, 'oranges': 5.0}
   shop2 = shop.FruitShop('shop2',dir2)
   shops = [shop1, shop2]
-  print "For orders ", orders, ", the best shop is", shopSmart(orders, shops).getName()
+  print ("For orders ", orders, ", the best shop is", shopSmart(orders, shops).getName())
   orders = [('apples',3.0)]
-  print "For orders: ", orders, ", the best shop is", shopSmart(orders, shops).getName()
+  print ("For orders: ", orders, ", the best shop is", shopSmart(orders, shops).getName())
