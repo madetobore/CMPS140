@@ -80,17 +80,22 @@ def depthFirstSearch(problem):
   print "Is the start a goal?", problem.isGoal(problem.startingState())
   print "Start's successors:", problem.successorStates(problem.startingState())
   """
-  # util.raiseNotDefined()
-  fringe = util.Stack()
-  fringe.push((problem.startingState(), [], []))
-  while not fringe.isEmpty():
-    node, actions, visited = fringe.pop()
+  #util.raiseNotDefined()
 
-    for coord, direction, steps in problem.successorStates(node):
-      if coord not in visited:
-        if problem.isGoal(coord):
-          return actions + [direction]
-        fringe.push((coord, actions + [direction], visited + [node]))
+  fringe = util.Stack() #uses the stack data structure provided in util.py
+  fringe.push((problem.startingState(), [], [])) #initial state
+  while fringe:
+    vertex, moves, visited = fringe.pop()
+
+    for location, direction, steps in problem.successorStates(vertex):
+      if location not in visited:
+        if problem.isGoal(location):
+          return moves + [direction]
+        fringe.push((location, moves + [direction], visited + [vertex]))
+
+  #problem.startingState()
+  #problem.isGoal(problem.startingState())
+  #problem.successorStates(problem.startingState())
   return []
 
 def breadthFirstSearch(problem):
