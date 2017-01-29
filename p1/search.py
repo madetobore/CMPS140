@@ -100,11 +100,49 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
   "Search the shallowest nodes in the search tree first. [p 81]"
-  util.raiseNotDefined()
+  # util.raiseNotDefined()
+  fringe = util.Queue() #breadthFirst uses queue
+  fringe.push((problem.startingState(), [])) #initial
+  visited = []
+  while fringe:
+    vertex, moves = fringe.pop()
+
+    for location, direction, steps in problem.successorStates(vertex):
+      if location not in visited:
+        if problem.isGoal(location):
+          # print moves + [direction]
+          return moves + [direction]
+        fringe.push((location, moves + [direction]))
+        visited.append(location)
+        # print visited
+
+  return []
       
 def uniformCostSearch(problem):
   "Search the node of least total cost first. "
-  util.raiseNotDefined()
+  # util.raiseNotDefined()
+  fringe = util.PriorityQueue()
+  fringe.push((problem.startingState(), []), 0)
+  visited = []
+
+  while fringe:
+    vertex, cost = fringe.pop()
+
+    # if vertex not in visited:
+    #   visited.append(vertex)
+
+    if problem.isGoal(vertex):
+      return cost
+
+    visited.append(vertex)
+
+    for location, direction, steps in problem.successorStates(vertex):
+      if location not in visited:
+        newCost = cost + [direction]
+        fringe.push((location, newCost), problem.actionsCost(newCost))
+
+  return []
+
 
 def nullHeuristic(state, problem=None):
   """
@@ -115,9 +153,28 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
   "Search the node that has the lowest combined cost and heuristic first."
-  util.raiseNotDefined()
-    
+  # util.raiseNotDefined()
 
+  fringe = util.PriorityQueue()
+  start = problem.startingState()
+  closedSet = []
+  fringe.push((start, []),heuristic(start, problem))
+
+  while fringe:
+    vertex, cost = fringe.pop()
+
+    if problem.isGoal(vertex):
+      return cost
+
+    closedSet.append(vertex)
+
+    for location, direction, moves in problem.successorStates(vertex):
+      if location not in closedSet:
+        newCost = cost + [direction]
+        priority = problem.actionsCost(newCost) + heuristic(location, problem)
+        fringe.push((location, newCost), priority)
+
+  return []
   
 # Abbreviations
 bfs = breadthFirstSearch
