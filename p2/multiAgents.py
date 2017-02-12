@@ -65,10 +65,81 @@ class ReflexAgent(Agent):
     newPosition = successorGameState.getPacmanPosition()
     oldFood = currentGameState.getFood()
     newGhostStates = successorGameState.getGhostStates()
-    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates] #tried finding reason to use this but was not able to find good way for pacman to go after scared ghosts
 
     "*** YOUR CODE HERE ***"
-    return successorGameState.getScore()
+    #Minimum required elements needed seem to have been position/number of food, ghosts and capsules relative to
+    #pacman
+    #Tried to have scared ghosts seem equivalent if not more of a reward than food but ended up having pacman just go
+    #for food instead
+    #Values used simply numbers divisible by 5 for the most part
+
+    # print successorGameState
+    # print  newGhostStates
+
+    #code snippet of how to use getfood() for positions
+    # currentFood = state.getFood()
+    # if currentFood[x][y] == True: ...
+
+    foodSpots = oldFood.asList() #working with food as list is easier for location checking, function found in game.py grid Class
+    score = currentGameState.getScore() #to avoid using getScore multiple times later
+
+    #Needed in order to have a goal state, seems to work without isWin() but left that in case any strange
+    #outcomes were to occur
+    if successorGameState.isWin():
+      return float("inf")
+    if successorGameState.isLose():
+      return -float("inf")
+
+    ghostPos = currentGameState.getGhostPosition(1)
+    pacGhostDist = 1/max(util.manhattanDistance(newPosition, ghostPos), 1) #uses max comparing with 1 so as to not crash for having 0 in denominator
+    # print util.manhattanDistance(newPosition, ghostPos)
+    if newScaredTimes >= 0:
+      scaredPacGhostDist = util.manhattanDistance(newPosition, ghostPos)
+      score += 1/max(scaredPacGhostDist, 1) # reciprocal may help later
+    else:
+      score += pacGhostDist
+      # score += max(pacGhostDist,3) #reciprocal may help later
+      # score -= (max(pacGhostDist, 5)*3 + successorGameState.getScore())
+
+
+    nearbyFood = 50
+    for foodSpot in foodSpots: #iterates through food location to find ideal food to go to next
+       pacFoodDist = util.manhattanDistance(newPosition, foodSpot)
+       if pacFoodDist < nearbyFood:
+         nearbyFood = pacFoodDist
+    #   # oldFood = currentGameState.getFood()
+
+    #this section compares the amount of food in order to give pacman the incentive of moving towards the food
+    currentFoodNum = currentGameState.getNumFood()
+    successorFoodNum = successorGameState.getNumFood()
+    if currentFoodNum > successorFoodNum:
+      score += 50
+
+    score -= nearbyFood * 5 # incentive for pacman to not sit around
+
+    score += max(pacGhostDist, 5)  # reciprocal may help later
+
+    if action == Directions.STOP: #gives pacman incentive to move instead of staying stuck in one spot for long amounts of time
+      score -= 10
+
+    #gives incentive for pacman to move toward capsule while still comparing rewards for instead going towards the food
+    #still a bit confused as to why pacman seems to always go for the food and never take the capsule, assuming it's
+    # because i wasn't able to give enough incentive for chasing ghost after capsule
+    capsuleList = currentGameState.getCapsules()
+    # numCapsules = len(capsuleList)
+    if successorGameState.getPacmanPosition() in capsuleList:
+      score += 100
+    #   pacCapsuleDist = util.manhattanDistance(capsuleList[0], newPosition)
+    #   # score += pacCapsuleDist*5 + successorGameState.getScore()
+    #   score += 100
+
+    # print capsuleList
+    # print oldFood
+    # print ghostPos
+    # print newPosition
+    # return successorGameState.getScore()
+    return score
 
 def scoreEvaluationFunction(currentGameState):
   """
@@ -125,7 +196,52 @@ class MinimaxAgent(MultiAgentSearchAgent):
       gameState.getNumAgents():
         Returns the total number of agents in the game
     """
+
+    #pseudocode from slides for easier reference while working
+    # def value(state):
+    # If the state is a terminal state: return the state's utility
+    # If the next agent is MAX: return max - value(state)
+    # If the next agent is MIN: return min - value(state)
+    #
+    # def max-value(state) :
+    # Initialize max = -inf For each successor of state:
+    # Compute value(successor)
+    # Update max accordingly
+    # Return max
     "*** YOUR CODE HERE ***"
+
+    def minValue(gameState, treeDepth): #ghosts
+      if gameState.isWin() or gameState.isLose():
+        return self.evaluationFunction(gameState)
+      minVal = float("inf")
+      return minVal
+
+    def maxValue(gameState, treeDepth): #pacman
+      if gameState.isWin() or gameState.isLose():
+        return self.evaluationFunction(gameState)
+      pacActions = gameState.getLegalActions(0) #gets pacmans actions
+      maxVal = -float("inf")
+      for moveChoice in pacActions:
+        #generateSuccessor uses pacman's next move, the next depth found by treedepth-1
+        maxValue(maxVal, minValue(gameState.generateSuccessor(0, moveChoice),treeDepth-1))
+      return maxVal
+
+    moves = gameState.getLegalActions()
+    ghostNum = gameState.getNumAgents() - 1 #since pacman is index 0 this gives ghost number
+    maxChoice = Directions.STOP #initiate on always legal state since basically neutral
+    newScore = -float("inf")  # ensures first newscore chooses the max between score and what minvalue returns
+    for nextMove in moves:
+      nextState = gameState.generateSuccessor(0, nextMove)
+      score = newScore
+      newScore = max(score, minValue(nextState, self.treeDepth))
+      if newScore > score:
+        maxChoice = nextMove
+
+    return maxChoice
+
+
+
+
     util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
