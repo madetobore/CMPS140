@@ -200,8 +200,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
     #pseudocode from slides for easier reference while working
     # def value(state):
     # If the state is a terminal state: return the state's utility
-    # If the next agent is MAX: return max - value(state)
-    # If the next agent is MIN: return min - value(state)
+    # If the next agent is MAX: return max-value(state)
+    # If the next agent is MIN: return min-value(state)
     #
     # def max-value(state) :
     # Initialize max = -inf For each successor of state:
@@ -210,37 +210,49 @@ class MinimaxAgent(MultiAgentSearchAgent):
     # Return max
     "*** YOUR CODE HERE ***"
 
-    def minValue(gameState, treeDepth): #ghosts
-      if gameState.isWin() or gameState.isLose():
+    # ghosts, agentIndex used for the loop to keep track of each one's moves
+    def minValue(gameState, treeDepth, ghostNum, agentIndex):
+      # added treeDepth == 0 as termination to stop attempting to reach nonexistant index, isWin/isLose basic terminations
+      if gameState.isWin() or gameState.isLose() or treeDepth == 0:
         return self.evaluationFunction(gameState)
-      minVal = float("inf")
+      minVal = float("inf") #allows comparison to always pick the min
+      ghostMoves = gameState.getLegalActions(agentIndex)
+      if agentIndex == ghostNum: #different action if the last ghost
+        for move in ghostMoves:
+          #once last ghost is reached calls maxValue for pacman's next move
+          minVal = min(minVal, maxValue(gameState.generateSuccessor(agentIndex, move), treeDepth-1,ghostNum))
+      else:
+        #recursive function in order to find all ghost moves, stays in same depth while index increases
+        for move in ghostMoves:
+          minVal = min(minVal, minValue(gameState.generateSuccessor(agentIndex, move), treeDepth, ghostNum, agentIndex + 1))
+
+
       return minVal
 
-    def maxValue(gameState, treeDepth): #pacman
-      if gameState.isWin() or gameState.isLose():
+    def maxValue(gameState, treeDepth, ghostNum): #pacman
+      # added treeDepth == 0 as termination to stop attempting to reach nonexistant index, isWin/isLose basic terminations
+      if gameState.isWin() or gameState.isLose() or treeDepth == 0:
         return self.evaluationFunction(gameState)
       pacActions = gameState.getLegalActions(0) #gets pacmans actions
-      maxVal = -float("inf")
+      maxVal = -float("inf") #initiates at this value to allow comparison to actually pick the max
       for moveChoice in pacActions:
-        #generateSuccessor uses pacman's next move, the next depth found by treedepth-1
-        maxValue(maxVal, minValue(gameState.generateSuccessor(0, moveChoice),treeDepth-1))
+        #generateSuccessor uses pacman's next move
+        # minVal uses the successor, depth, number of ghosts, and 1 to reference that in the agent list ghosts are >= 1
+        maxVal = max(maxVal, minValue(gameState.generateSuccessor(0, moveChoice),treeDepth-1, ghostNum, 1))
       return maxVal
 
     moves = gameState.getLegalActions()
     ghostNum = gameState.getNumAgents() - 1 #since pacman is index 0 this gives ghost number
     maxChoice = Directions.STOP #initiate on always legal state since basically neutral
-    newScore = -float("inf")  # ensures first newscore chooses the max between score and what minvalue returns
-    for nextMove in moves:
+    newScore = -float("inf")  # ensures first score chooses the max between score and what minvalue returns
+    for nextMove in moves: #loop iniates to choose which actions to take
       nextState = gameState.generateSuccessor(0, nextMove)
       score = newScore
-      newScore = max(score, minValue(nextState, self.treeDepth))
+      newScore = max(score, minValue(nextState, self.treeDepth, ghostNum, 1))#finds minMove based off pacman's first move and self.treedepth
       if newScore > score:
         maxChoice = nextMove
 
     return maxChoice
-
-
-
 
     util.raiseNotDefined()
 
@@ -254,6 +266,67 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       Returns the minimax action using self.treeDepth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
+    #replaced ghostNum with alpha/beta in order to go through the pruning process correctly
+    # ghosts, agentIndex used for the loop to keep track of each one's moves
+    def minValue(gameState, treeDepth, agentIndex, alpha, beta):
+      # added treeDepth == 0 as termination to stop attempting to reach nonexistant index, isWin/isLose basic terminations
+      if gameState.isWin() or gameState.isLose() or treeDepth == 0:
+        return self.evaluationFunction(gameState)
+      minVal = float("inf")  # allows comparison to always pick the min
+      ghostMoves = gameState.getLegalActions(agentIndex)
+
+      if agentIndex == ghostNum:  # different action if the last ghost
+        for move in ghostMoves:
+          # once last ghost is reached calls maxValue for pacman's next move
+          minVal = min(minVal, maxValue(gameState.generateSuccessor(agentIndex, move), treeDepth - 1, alpha, beta))
+          if minVal <= alpha:
+            return minVal
+          beta = min(beta, minVal)
+
+      else:
+        # recursive function in order to find all ghost moves, stays in same depth while index increases
+        for move in ghostMoves:
+          minVal = min(minVal,minValue(gameState.generateSuccessor(agentIndex, move), treeDepth, agentIndex + 1, alpha, beta))
+          if minVal <= alpha:
+            return minVal
+          beta = min(beta, minVal)
+      return minVal
+
+    def maxValue(gameState, treeDepth, alpha, beta):  # pacman
+      # added treeDepth == 0 as termination to stop attempting to reach nonexistant index, isWin/isLose basic terminations
+      if gameState.isWin() or gameState.isLose() or treeDepth == 0:
+        return self.evaluationFunction(gameState)
+      pacActions = gameState.getLegalActions(0)  # gets pacmans actions
+      maxVal = -float("inf")  # initiates at this value to allow comparison to actually pick the max
+      for moveChoice in pacActions:
+        # generateSuccessor uses pacman's next move
+        # minVal uses the successor, depth, and 1 to reference that in the agent list ghosts are >= 1,
+        # and alpha/beta for pruning
+        maxVal = max(maxVal, minValue(gameState.generateSuccessor(0, moveChoice), treeDepth - 1, 1, alpha, beta))
+        if maxVal >= beta:
+          return maxVal
+        alpha = max(alpha, maxVal)
+      return maxVal
+
+    #alpha and beta values necessary for alpha-beta pruning
+    alpha = -float("inf")
+    beta = float("inf")
+    moves = gameState.getLegalActions()
+    ghostNum = gameState.getNumAgents() - 1  # since pacman is index 0 this gives ghost number
+    maxChoice = Directions.STOP  # initiate on always legal state since basically neutral
+    newScore = -float("inf")  # ensures first score chooses the max between score and what minvalue returns
+    for nextMove in moves:  # loop iniates to choose which actions to take
+      nextState = gameState.generateSuccessor(0, nextMove)
+      score = newScore
+      newScore = max(score, minValue(nextState, self.treeDepth,1, alpha, beta))  # finds minMove based off pacman's first move and self.treedepth
+      if newScore > score:
+        maxChoice = nextMove
+
+      if newScore >= beta:
+        return maxChoice
+      alpha = max(alpha, newScore)
+
+    return maxChoice
     util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
@@ -269,6 +342,71 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       legal moves.
     """
     "*** YOUR CODE HERE ***"
+
+    # def value(s)
+    #   if s is a max node return maxValue(s)
+    #   if s is an exp node return expValue(s)
+    #   if s is a terminal node return evaluation(s)
+    #
+    # def maxValue(s)
+    #   values = [value(s') for s' in successors(s)]
+    #   return max(values)
+    #
+    # def expValue(s)
+    #   values = [value(s') for s' in successors(s)]
+    #   weights = [probability(s, s') for s' in successors(s)]
+    #   return expectation(values, weights)
+
+    #unlike minimax ghost number is not necessary as a parameter
+    def maxValue(gameState, treeDepth):  # pacman
+      # added treeDepth == 0 as termination to stop attempting to reach nonexistant index, isWin/isLose basic terminations
+      if gameState.isWin() or gameState.isLose() or treeDepth == 0:
+        return self.evaluationFunction(gameState)
+      pacActions = gameState.getLegalActions(0)  # gets pacmans actions
+      maxVal = -float("inf")  # initiates at this value to allow comparison to actually pick the max
+      for moveChoice in pacActions:
+        newMax = maxVal
+        # generateSuccessor uses pacman's next move
+        # maxVal uses the successor, depth, and 1 to reference that in the agent list ghosts are >= 1
+        maxVal = max(newMax, expValue(gameState.generateSuccessor(0, moveChoice), treeDepth, 1))
+        #selects new max through max function using expected value vs max value
+      return maxVal #function returns maxValue that's used in expValue
+
+    def expValue(gameState, treeDepth, agentIndex):
+      # added treeDepth == 0 as termination to stop attempting to reach nonexistant index, isWin/isLose basic terminations
+      if gameState.isWin() or gameState.isLose() or treeDepth == 0:
+        return self.evaluationFunction(gameState)
+      # expVal = float("inf")  # allows comparison to always pick the min, not needed in expValue
+      ghostMoves = gameState.getLegalActions(agentIndex)
+      ghostNum = gameState.getNumAgents() - 1 #don't need as a parameter but need in order to find moves for all agents not pacman
+      ghostMovesNum = len(ghostMoves) #number of moves that ghosts can make
+      expVal = 0 #expValue sums up the values of the nodes and later divides them for a distribution
+      for move in ghostMoves:
+        if (agentIndex == ghostNum):
+          expVal += maxValue(gameState.generateSuccessor(agentIndex, move), treeDepth - 1)
+        else:
+          expVal += expValue(gameState.generateSuccessor(agentIndex, move), treeDepth, agentIndex + 1)
+
+      return expVal/ghostMovesNum
+      # expValue() calculates values and weights, the weights are expressed through ghostMovesNum and divides the values
+      # from each chance node in order to return the probability distribution
+
+    if gameState.isWin() or gameState.isLose():
+      return self.evaluationFunction(gameState)
+    moves = gameState.getLegalActions()
+    # ghostNum = gameState.getNumAgents() - 1  # since pacman is index 0 this gives ghost number, not needed here
+    maxChoice = Directions.STOP  # initiate on always legal state since basically neutral
+    newScore = -float("inf")  # ensures first score chooses the max between score and what minvalue returns
+    for nextMove in moves:  # loop initiates to choose which actions to take
+      score = newScore
+      # finds expMove based off pacman's first move and self.treedepth and then gets max in order to choose what pacman does
+      newScore = max(score, expValue(gameState.generateSuccessor(0,nextMove), self.treeDepth, 1))
+
+      if newScore > score:
+        maxChoice = nextMove
+
+    return maxChoice
+
     util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
@@ -277,8 +415,51 @@ def betterEvaluationFunction(currentGameState):
     evaluation function (question 5).
 
     DESCRIPTION: <write something here so we know what you did>
+    Pretty much used what was done in the earlier evaluation function, uses spots where there is food and their
+    manhattan distance in order to give incentive for pacman to collect food, distance between pacman and ghosts at
+    every state is achieved through use of a while loop unlike for loops from earlier because we are not using a list
+    to keep track of movements, if a capsule is available there is also incentive for pacman to move towards those spots
+    numbers are for the most part arbitrary multiples of 5 again
+
+    After submitting through autograder I found that by checking for more factors pacman lost more than winning so I
+    commented that out unless I can figure out a better way for Pacman to check
   """
   "*** YOUR CODE HERE ***"
+  if currentGameState.isWin():
+    return float("inf")
+  if currentGameState.isLose():
+    return -float("inf")
+  score = currentGameState.getScore()
+  oldFood = currentGameState.getFood()
+  currentPos = currentGameState.getPacmanPosition()
+  foodSpots = oldFood.asList()
+  nearbyFood = float("inf")#in order to let the for loop set a new value on first iteration
+  ghostNum = currentGameState.getNumAgents() - 1
+  capsuleList = currentGameState.getCapsules()
+
+  for foodSpot in foodSpots:  # iterates through food location to find ideal food to go to next
+    pacFoodDist = util.manhattanDistance(currentPos, foodSpot)
+    if pacFoodDist < nearbyFood:
+      nearbyFood = pacFoodDist
+
+  # agent = 1
+  # nextGhostDist = float("inf") #in order to get shortest distant to nearest ghost, starts at inf
+  # while ghostNum >= agent:
+  #   pacGhostDist = util.manhattanDistance(currentPos, currentGameState.getGhostPosition(agent))
+  #   pacGhostDist = min(pacGhostDist, nextGhostDist)
+  #   agent += 1
+  #
+  # score += max(pacGhostDist, 5) * 2
+  # # score += pacGhostDist
+  #
+  # if currentGameState.getPacmanPosition() in capsuleList:
+  #   score += 50
+
+  score -= len(foodSpots) *25
+  score -= 25*nearbyFood
+
+  return score
+
   util.raiseNotDefined()
 
 # Abbreviation
