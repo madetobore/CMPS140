@@ -159,7 +159,7 @@ class PositionSearchProblem(search.SearchProblem):
 
   def isGoal(self, state):
     isGoal = state == self.goal 
-     
+
     # For display purposes only
     if isGoal:
       self._visitedlist.append(state)
@@ -167,7 +167,7 @@ class PositionSearchProblem(search.SearchProblem):
       if '_display' in dir(__main__):
         if 'drawExpandedCells' in dir(__main__._display): #@UndefinedVariable
           __main__._display.drawExpandedCells(self._visitedlist) #@UndefinedVariable
-       
+
     return isGoal  
    
   def successorStates(self, state):
@@ -181,23 +181,23 @@ class PositionSearchProblem(search.SearchProblem):
      required to get there, and 'stepCost' is the incremental 
      cost of expanding to that successor
     """
-    
+
     successors = []
     for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-      x,y = state
+      x, y = state
       dx, dy = Actions.directionToVector(action)
       nextx, nexty = int(x + dx), int(y + dy)
       if not self.walls[nextx][nexty]:
         nextState = (nextx, nexty)
         cost = self.costFn(nextState)
-        successors.append( ( nextState, action, cost) )
-        
+        successors.append((nextState, action, cost))
+
     # Bookkeeping for display purposes
-    self._expanded += 1 
+    self._expanded += 1
     if state not in self._visited:
       self._visited[state] = True
       self._visitedlist.append(state)
-      
+
     return successors
 
   def actionsCost(self, actions):
@@ -287,11 +287,20 @@ class CornersProblem(search.SearchProblem):
     "Returns the start state (in your state space, not the full Pacman state space)"
     
     "*** Your Code Here ***"
+    return (self.startingPosition, [])
     
   def isGoal(self, state):
     "Returns whether this search state is a goal state of the problem"
-    
-    "*** Your Code Here ***"
+    vertex = state[0]
+    visited = state[1]
+    if vertex in self.corners:
+      if vertex not in visited:
+        visited.append(vertex)
+      return len(visited) == 4
+    return False
+
+    # "*** Your Code Here ***"
+
        
   def successorStates(self, state):
     """
@@ -304,19 +313,42 @@ class CornersProblem(search.SearchProblem):
      required to get there, and 'stepCost' is the incremental 
      cost of expanding to that successor
     """
+
+    # succ = []
+    # self._expanded += 1
+    # for direction in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+    #   x,y = state[0]
+    #   dx, dy = Actions.directionToVector(direction)
+    #   nextx, nexty = int(x + dx), int(y + dy)
+    #   if not self.walls[nextx][nexty]:
+    #     nextFood = state[1].copy()
+    #     nextFood[nextx][nexty] = False
+    #     succ.append( ( ((nextx, nexty), nextFood), direction, 1) )
+    # return succ
+
     
     succ = []
-    for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+
+    for direction in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
       # Add a successor state to the successor list if the action is legal
       # Here's a code snippet for figuring out whether a new position hits a wall:
-      #   x,y = currentPosition
-      #   dx, dy = Actions.directionToVector(action)
-      #   nextx, nexty = int(x + dx), int(y + dy)
-      #   hitsWall = self.walls[nextx][nexty]
-      
+
+      x,y = state[0]
+      corners = state[1]
+      dx, dy = Actions.directionToVector(direction)
+      nextx, nexty = int(x + dx), int(y + dy)
+      hitsWall = self.walls[nextx][nexty]
+      if not hitsWall:
+        visited = list(corners)
+        nextState = (nextx, nexty)
+        if nextState in self.corners:
+          if nextState not in visited:
+            visited.append(nextState)
+        succ.append(((nextState, visited), direction, 0)) #fixed cost to be 1 as indicated
+
       "*** Your Code Here ***"
-      util.raiseNotDefined()
-      
+      # util.raiseNotDefined()
+
     self._expanded += 1
     return succ
 
@@ -350,7 +382,7 @@ def cornersHeuristic(state, problem):
   """
   corners = problem.corners # These are the corner coordinates
   walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-  
+
   "*** Your Code Here ***"
   
   return 0 # Default to trivial solution
