@@ -81,6 +81,7 @@ def depthFirstSearch(problem):
   print "Start's successors:", problem.successorStates(problem.startingState())
   """
   #util.raiseNotDefined()
+  #initial stages of dfs code http://eddmann.com/posts/depth-first-search-and-breadth-first-search-in-python/
 
   fringe = util.Stack() #uses the stack data structure provided in util.py
   fringe.push((problem.startingState(), [], [])) #initial state
@@ -101,6 +102,7 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
   "Search the shallowest nodes in the search tree first. [p 81]"
   # util.raiseNotDefined()
+  #initial stages of bfs code from http://eddmann.com/posts/depth-first-search-and-breadth-first-search-in-python/
   fringe = util.Queue() #breadthFirst uses queue
   fringe.push((problem.startingState(), [])) #initial
   visited = []
