@@ -50,7 +50,7 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     for iter in range(0, iters):
       for state in mdp.getStates():
-        if self.mdp.isTerminal(state):
+        if self.mdp.getPossibleActions(state) == "exit":
           vals[state] = mdp.getReward(state, None, state)
 
         else:
@@ -105,11 +105,17 @@ class ValueIterationAgent(ValueEstimationAgent):
     """ YOUR CODE HERE """
     maxQ = 0
 
-    for (nextState, prob) in self.mdp.getTransitionStatesAndProbs(state, action):
-      maxQ += prob * (self.mdp.getReward(state, action, nextState) + self.discountRate * self.getValue(nextState))
+    for (transState, transProb) in self.mdp.getTransitionStatesAndProbs(state, action):
+      maxQ += (transProb * (self.mdp.getReward(state, action, transState) + self.discountRate * self.getValue(transState)))
     return maxQ
+    # maxQ = 0
+    # for transStateProb in self.mdp.getTransitionStatesAndProbs(state, action):
+    #   transState = transStateProb[0]
+    #   transProb = transStateProb[1]
+    #   maxQ += transProb *(self.mdp.getReward(state, action, transState) + self.discountRate * self.values[transState])
+    # return maxQ
     # util.raiseNotDefined()
-    """ END CODE """
+    # """ END CODE """
 
   def getPolicy(self, state):
     """
@@ -131,7 +137,10 @@ class ValueIterationAgent(ValueEstimationAgent):
     returned
     """
     """ YOUR CODE HERE """
-    if len(self.mdp.getPossibleActions(state)) < 1:
+    legalActions = self.mdp.getPossibleActions(state)
+
+    if legalActions == "exit":
+    # if len(self.mdp.getPossibleActions(state)) < 1:
        return None
 
     bestAction = None
@@ -141,7 +150,15 @@ class ValueIterationAgent(ValueEstimationAgent):
       if tempReward >= maxVal:
         maxVal = tempReward
         bestAction = action
+
     return bestAction
+    # bestAction = None
+    # if len(legalActions) > 0:
+    #   tempValues = util.Counter()
+    #   for action in legalActions:
+    #     tempValues[action] = self.getQValue(state, action)
+    #   bestAction = tempValues.argMax()
+    # return bestAction
 
     # util.raiseNotDefined()
     """ END CODE """

@@ -74,7 +74,8 @@ class QLearningAgent(ReinforcementAgent):
     and then returns it
     """
     """ YOUR CODE HERE """
-    if len(self.getLegalActions(state)):
+    # if legalActions[0] == "exit":
+    if self.getLegalActions(state)[0] == "exit":
       return 0.0
     else:
       max_action = -float("infinity")
@@ -95,7 +96,8 @@ class QLearningAgent(ReinforcementAgent):
     [Enter a description of what you did here.]
     """
     """ YOUR CODE HERE """
-    if not self.getLegalActions(state):
+    # if not self.getLegalActions(state):
+    if self.getLegalActions(state)[0] == "exit":
       return None
     bestAction = None
     maxQVal = 0
