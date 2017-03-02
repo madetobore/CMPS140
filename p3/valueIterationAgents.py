@@ -40,7 +40,25 @@ class ValueIterationAgent(ValueEstimationAgent):
     [Enter a description of what you did here.]
     """
     """ YOUR CODE HERE """
-    util.raiseNotDefined()
+    for iter in range(0, iters):
+      for state in mdp.getStates():
+        maxUtil = 0
+        maxReward = 0
+        for action in mdp.getPossibleActions(state):
+          tempUtil = 0
+          for temp in mdp.getTransitionStatesAndProbs(state, action):
+            nextState = temp[0]
+            nextProb = temp[1]
+            nextReward = mdp.getReward(state, action, nextState)
+            tempUtil += nextProb * self.values[nextState]
+          if tempUtil >= maxUtil:
+            maxUtil = tempUtil
+            maxReward = nextReward
+        self.values[state] = maxReward + maxUtil * discountRate
+
+
+    #util.raiseNotDefined()
+
     """ END CODE """
 
   def getValue(self, state):
@@ -49,12 +67,12 @@ class ValueIterationAgent(ValueEstimationAgent):
     """
     return self.values[state]
 
-    """Description:
-    [Enter a description of what you did here.]
-    """
-    """ YOUR CODE HERE """
-    util.raiseNotDefined()
-    """ END CODE """
+    # """Description:
+    # [Enter a description of what you did here.]
+    # """
+    # """ YOUR CODE HERE """
+    # util.raiseNotDefined()
+    # """ END CODE """
 
   def getQValue(self, state, action):
     """
@@ -66,9 +84,24 @@ class ValueIterationAgent(ValueEstimationAgent):
     """
     """Description:
     [Enter a description of what you did here.]
+    Based on Q-learning from Sutton
+    transState is used to be the current state with transProb being the
+    possible next state
+    possQ is the value associated with the transProb state
+    If the value of possQ is greater than that of the maxQ, maxQ is then
+    replaced
+
     """
     """ YOUR CODE HERE """
-    util.raiseNotDefined()
+    maxQ = 0;
+    for transition in self.mdp.getTransitionStatesAndProbs(state, action):
+        transState = transition[0]
+        transProb = transition[1]
+        possQ = transProb * self.values[transState]
+        if possQ >= maxQ:
+          maxQ = possQ
+    return maxQ
+    # util.raiseNotDefined()
     """ END CODE """
 
   def getPolicy(self, state):
@@ -82,9 +115,26 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     """Description:
     [Enter a description of what you did here.]
+    Initialize bestAction to an empty string to be filled with a movement
+    The for loop goes through the possible actions in order to find the move
+    that would in theory be the best in regards to the policy, by going through
+    the actions, the highest q value is set as maxVal in order to select the
+    best action that is returned
     """
     """ YOUR CODE HERE """
-    util.raiseNotDefined()
+    if not self.mdp.getPossibleActions(state):
+       return None
+
+    bestAction = ""
+    maxVal = 0
+    for action in self.mdp.getPossibleActions(state):
+      tempReward = self.getQValue(state, action)
+      if tempReward > maxVal:
+        maxVal = tempReward
+        bestAction = action
+    return bestAction
+
+    # util.raiseNotDefined()
     """ END CODE """
 
   def getAction(self, state):
