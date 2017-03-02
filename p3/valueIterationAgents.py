@@ -44,30 +44,20 @@ class ValueIterationAgent(ValueEstimationAgent):
     range of iterations given by iters is completed
     """
     """ YOUR CODE HERE """
-    vals = util.Counter()
     for state in mdp.getStates():
-      self.values[state] = 0
-
-    for iter in range(0, iters):
+      self.values[state] = mdp.getReward(state, 'Stop', state)
+    for iter in range(1,iters):
+      newVals = util.Counter()
       for state in mdp.getStates():
-        if self.mdp.getPossibleActions(state) == "exit":
-          vals[state] = mdp.getReward(state, None, state)
-
-        else:
-          maxUtil = 0
-          for action in mdp.getPossibleActions(state):
-            tempUtil = 0
-            for temp in self.mdp.getTransitionStatesAndProbs(state, action):
-              tempUtil = tempUtil + temp[1] * self.getValue(temp[0])
-
-            if tempUtil >= maxUtil:
-              maxUtil = tempUtil
-
-          vals[state] = self.mdp.getReward(state, None, None) + discountRate * maxUtil
-
+        tempVals = util.Counter()
+        for action in mdp.getPossibleActions(state):
+          for transStateProb in mdp.getTransitionStatesAndProbs(state, action):
+            transState = transStateProb[0]
+            transProb = transStateProb[1]
+            tempVals[action] += transProb * (mdp.getReward(state, action, transState) + self.discountRate * self.values[transState])
+          newVals[state] = tempVals[tempVals.argMax()]
       for state in mdp.getStates():
-        self.values[state] = vals[state]
-
+        self.values[state] = newVals[state]
     #util.raiseNotDefined()
 
     """ END CODE """
@@ -103,18 +93,12 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     """
     """ YOUR CODE HERE """
-    maxQ = 0
-
-    for (transState, transProb) in self.mdp.getTransitionStatesAndProbs(state, action):
-      maxQ += (transProb * (self.mdp.getReward(state, action, transState) + self.discountRate * self.getValue(transState)))
-    return maxQ
-    # maxQ = 0
-    # for transStateProb in self.mdp.getTransitionStatesAndProbs(state, action):
-    #   transState = transStateProb[0]
-    #   transProb = transStateProb[1]
-    #   maxQ += transProb *(self.mdp.getReward(state, action, transState) + self.discountRate * self.values[transState])
-    # return maxQ
-    # util.raiseNotDefined()
+    qVal = self.values[state]
+    for transStateProb in self.mdp.getTransitionStatesAndProbs(state, action):
+      transState = transStateProb[0]
+      transProb = transStateProb[1]
+      qVal += transProb * (self.mdp.getReward(state, action, transState) + self.discountRate * self.values[transState])
+    return qVal
     # """ END CODE """
 
   def getPolicy(self, state):
@@ -137,30 +121,14 @@ class ValueIterationAgent(ValueEstimationAgent):
     returned
     """
     """ YOUR CODE HERE """
-    legalActions = self.mdp.getPossibleActions(state)
-
-    if legalActions == "exit":
-    # if len(self.mdp.getPossibleActions(state)) < 1:
-       return None
-
     bestAction = None
-    maxVal = -9999999
-    for action in self.mdp.getPossibleActions(state):
-      tempReward = self.getQValue(state, action)
-      if tempReward >= maxVal:
-        maxVal = tempReward
-        bestAction = action
-
+    legalActions = self.mdp.getPossibleActions(state)
+    if len(legalActions) > 0:
+      tempVals = util.Counter()
+      for action in legalActions:
+        tempVals[action] = self.getQValue(state, action)
+      bestAction = tempVals.argMax()
     return bestAction
-    # bestAction = None
-    # if len(legalActions) > 0:
-    #   tempValues = util.Counter()
-    #   for action in legalActions:
-    #     tempValues[action] = self.getQValue(state, action)
-    #   bestAction = tempValues.argMax()
-    # return bestAction
-
-    # util.raiseNotDefined()
     """ END CODE """
 
   def getAction(self, state):
