@@ -38,24 +38,35 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     """Description:
     [Enter a description of what you did here.]
+    vals is used in order to collect reward states and in the end self.values
+    is set to vals
+    the best action based on utility is the next added to vals until the full
+    range of iterations given by iters is completed
     """
     """ YOUR CODE HERE """
-    for iter in range(0, iters):
-      for state in mdp.getStates():
-        maxUtil = 0
-        maxReward = 0
-        for action in mdp.getPossibleActions(state):
-          tempUtil = 0
-          for temp in mdp.getTransitionStatesAndProbs(state, action):
-            nextState = temp[0]
-            nextProb = temp[1]
-            nextReward = mdp.getReward(state, action, nextState)
-            tempUtil += nextProb * self.values[nextState]
-          if tempUtil >= maxUtil:
-            maxUtil = tempUtil
-            maxReward = nextReward
-        self.values[state] = maxReward + maxUtil * discountRate
+    vals = util.Counter()
+    for state in mdp.getStates():
+      self.values[state] = 0
 
+    for iter in range(iters):
+      for state in mdp.getStates():
+        if self.mdp.isTerminal(state):
+          vals[state] = mdp.getReward(state, None, state)
+
+        else:
+          maxUtil = 0
+          for action in mdp.getPossibleActions(state):
+            tempUtil = 0
+            for temp in self.mdp.getTransitionStatesAndProbs(state, action):
+              tempUtil = tempUtil + temp[1] * self.getValue(temp[0])
+
+            if tempUtil >= maxUtil:
+              maxUtil = tempUtil
+
+          vals[state] = self.mdp.getReward(state, None, None) + discountRate * maxUtil
+
+      for state in mdp.getStates():
+        self.values[state] = vals[state]
 
     #util.raiseNotDefined()
 
@@ -115,18 +126,20 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     """Description:
     [Enter a description of what you did here.]
-    Initialize bestAction to an empty string to be filled with a movement
+    Initialize bestAction to None as default action
+    Initialize maxVal with -infinity in order to ensure the first value is
+    used for comparisons until replaced
     The for loop goes through the possible actions in order to find the move
-    that would in theory be the best in regards to the policy, by going through
-    the actions, the highest q value is set as maxVal in order to select the
-    best action that is returned
+    that would be the best, by going through the actions, the highest
+    q value is set as maxVal in order to select the best action that is
+    returned
     """
     """ YOUR CODE HERE """
-    if len(self.mdp.getPossibleActions(state)):
+    if len(self.mdp.getPossibleActions(state)) < 1:
        return None
 
-    bestAction = ""
-    maxVal = 0
+    bestAction = None
+    maxVal = -float("inf")
     for action in self.mdp.getPossibleActions(state):
       tempReward = self.getQValue(state, action)
       if tempReward > maxVal:

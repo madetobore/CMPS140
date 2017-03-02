@@ -15,7 +15,7 @@
 
 def question2():
   answerDiscount = 0.9
-  answerNoise = 0.2
+  answerNoise = 0.01
   """Description:
   [Enter a description of what you did here.]
   """
