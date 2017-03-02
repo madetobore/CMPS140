@@ -40,7 +40,7 @@ def question3a():
 def question3b():
   answerDiscount = 0.35
   answerNoise = 0.34
-  answerLivingReward = -.09
+  answerLivingReward = .2
   """Description:
   [Enter a description of what you did here.]
   """
@@ -48,6 +48,7 @@ def question3b():
 
   """ END CODE """
   return answerDiscount, answerNoise, answerLivingReward
+  # return 'NOT POSSIBLE'
   # If not possible, return 'NOT POSSIBLE'
 
 def question3c():
@@ -66,14 +67,15 @@ def question3c():
 def question3d():
   answerDiscount = 0.9
   answerNoise = 0.2
-  answerLivingReward = 0.2
+  answerLivingReward = 0.1
   """Description:
   [Enter a description of what you did here.]
   """
   """ YOUR CODE HERE """
 
   """ END CODE """
-  return answerDiscount, answerNoise, answerLivingReward
+  # return answerDiscount, answerNoise, answerLivingReward
+  return 'NOT POSSIBLE'
   # If not possible, return 'NOT POSSIBLE'
 
 def question3e():

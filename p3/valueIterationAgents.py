@@ -48,7 +48,7 @@ class ValueIterationAgent(ValueEstimationAgent):
     for state in mdp.getStates():
       self.values[state] = 0
 
-    for iter in range(iters):
+    for iter in range(0, iters):
       for state in mdp.getStates():
         if self.mdp.isTerminal(state):
           vals[state] = mdp.getReward(state, None, state)
@@ -103,13 +103,10 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     """
     """ YOUR CODE HERE """
-    maxQ = 0;
-    for transition in self.mdp.getTransitionStatesAndProbs(state, action):
-        transState = transition[0]
-        transProb = transition[1]
-        possQ = transProb * self.values[transState]
-        if possQ >= maxQ:
-          maxQ = possQ
+    maxQ = 0
+
+    for (nextState, prob) in self.mdp.getTransitionStatesAndProbs(state, action):
+      maxQ += prob * (self.mdp.getReward(state, action, nextState) + self.discountRate * self.getValue(nextState))
     return maxQ
     # util.raiseNotDefined()
     """ END CODE """
@@ -138,10 +135,10 @@ class ValueIterationAgent(ValueEstimationAgent):
        return None
 
     bestAction = None
-    maxVal = -float("inf")
+    maxVal = -9999999
     for action in self.mdp.getPossibleActions(state):
       tempReward = self.getQValue(state, action)
-      if tempReward > maxVal:
+      if tempReward >= maxVal:
         maxVal = tempReward
         bestAction = action
     return bestAction
