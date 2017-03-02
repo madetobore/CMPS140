@@ -122,7 +122,7 @@ class ValueIterationAgent(ValueEstimationAgent):
     best action that is returned
     """
     """ YOUR CODE HERE """
-    if not self.mdp.getPossibleActions(state):
+    if len(self.mdp.getPossibleActions(state)):
        return None
 
     bestAction = ""
