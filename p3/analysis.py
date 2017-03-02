@@ -25,9 +25,9 @@ def question2():
   return answerDiscount, answerNoise
 
 def question3a():
-  answerDiscount = 0.9
-  answerNoise = 0.2
-  answerLivingReward = 0.0
+  answerDiscount = 0.2
+  answerNoise = 0.0
+  answerLivingReward = 0.1
   """Description:
   [Enter a description of what you did here.]
   """
@@ -38,9 +38,9 @@ def question3a():
   # If not possible, return 'NOT POSSIBLE'
 
 def question3b():
-  answerDiscount = 0.9
-  answerNoise = 0.2
-  answerLivingReward = 0.0
+  answerDiscount = 0.35
+  answerNoise = 0.34
+  answerLivingReward = -.09
   """Description:
   [Enter a description of what you did here.]
   """
@@ -52,8 +52,8 @@ def question3b():
 
 def question3c():
   answerDiscount = 0.9
-  answerNoise = 0.2
-  answerLivingReward = 0.0
+  answerNoise = 0.0
+  answerLivingReward = 0.1
   """Description:
   [Enter a description of what you did here.]
   """
@@ -66,7 +66,7 @@ def question3c():
 def question3d():
   answerDiscount = 0.9
   answerNoise = 0.2
-  answerLivingReward = 0.0
+  answerLivingReward = 0.2
   """Description:
   [Enter a description of what you did here.]
   """
@@ -79,7 +79,7 @@ def question3d():
 def question3e():
   answerDiscount = 0.9
   answerNoise = 0.2
-  answerLivingReward = 0.0
+  answerLivingReward = 1
   """Description:
   [Enter a description of what you did here.]
   """

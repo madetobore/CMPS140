@@ -95,7 +95,6 @@ class ValueIterationAgent(ValueEstimationAgent):
     """
     """Description:
     [Enter a description of what you did here.]
-    Based on Q-learning from Sutton
     transState is used to be the current state with transProb being the
     possible next state
     possQ is the value associated with the transProb state
