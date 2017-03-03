@@ -38,10 +38,10 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     """Description:
     [Enter a description of what you did here.]
-    vals is used in order to collect reward states and in the end self.values
-    is set to vals
-    the best action based on utility is the next added to vals until the full
-    range of iterations given by iters is completed
+    Iterates through all states and sets the values to the respective rewards
+    Then iterates through by the value of iters in order to choose the actions
+    based on rewards and values multiplied by discountrate
+    Lastly self.values is assigned the values given by newVals through use of a for loop
     """
     """ YOUR CODE HERE """
     for state in mdp.getStates():
@@ -85,11 +85,9 @@ class ValueIterationAgent(ValueEstimationAgent):
     """
     """Description:
     [Enter a description of what you did here.]
-    transState is used to be the current state with transProb being the
-    possible next state
-    possQ is the value associated with the transProb state
-    If the value of possQ is greater than that of the maxQ, maxQ is then
-    replaced
+    qVal is set to self.values in the given state
+    A for loop is used in order to get reachable states and their probabilities
+    through which we find our qValues
 
     """
     """ YOUR CODE HERE """
@@ -112,13 +110,13 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     """Description:
     [Enter a description of what you did here.]
-    Initialize bestAction to None as default action
-    Initialize maxVal with -infinity in order to ensure the first value is
-    used for comparisons until replaced
-    The for loop goes through the possible actions in order to find the move
-    that would be the best, by going through the actions, the highest
-    q value is set as maxVal in order to select the best action that is
-    returned
+    Initiates the best action at none
+    Checks if there are available legal actions which if there are not will cause the
+    bestAction to stay and be returned as None
+    If there are legal actions available a loop iterates looking for the best action
+    that can be taken and returns it by using argMax to return the action that has
+    the highest QValue
+
     """
     """ YOUR CODE HERE """
     bestAction = None

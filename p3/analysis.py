@@ -67,7 +67,7 @@ def question3c():
 def question3d():
   answerDiscount = 0.9
   answerNoise = 0.2
-  answerLivingReward = 0.1
+  answerLivingReward = 0.0
   """Description:
   [Enter a description of what you did here.]
   """
@@ -100,8 +100,9 @@ def question6():
   """ YOUR CODE HERE """
 
   """ END CODE """
-  return answerEpsilon, answerLearningRate
+  # return answerEpsilon, answerLearningRate
   # If not possible, return 'NOT POSSIBLE'
+  return 'NOT POSSIBLE'
 
 if __name__ == '__main__':
   print 'Answers to analysis questions:'

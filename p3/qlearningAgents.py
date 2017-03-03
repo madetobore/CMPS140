@@ -94,19 +94,27 @@ class QLearningAgent(ReinforcementAgent):
     """
     """Description:
     [Enter a description of what you did here.]
+    Similar to getPolicy from valueIteration agents in how it checks for available actions
+    Goes through a loop to find the best actions and puts them in a list in order
+    to reference them later to find the bestaction
     """
     """ YOUR CODE HERE """
     # if not self.getLegalActions(state):
-    if self.getLegalActions(state)[0] == "exit":
-      return None
+    # if self.getLegalActions(state)[0] == "exit":
+    #   return None
     bestAction = None
     maxQVal = 0
-    for action in self.getLegalActions(state):
-      if maxQVal <= self.getQValue(state, action):
-        maxQVal = self.getQValue(state, action)
-        bestAction = action
-
     bestActions = []
+    if (len(self.getLegalActions(state)) > 0):
+      # maxQVal = 0
+      for action in self.getLegalActions(state):
+        if maxQVal <= self.getQValue(state, action):
+          maxQVal = self.getQValue(state, action)
+          bestAction = action
+          bestActions.append(bestAction)
+      # return bestAction
+
+    # bestActions = []
     for action in self.getLegalActions(state):
       if maxQVal == self.getQValue(state, action):
         bestActions.append(action)
@@ -132,6 +140,10 @@ class QLearningAgent(ReinforcementAgent):
 
     """Description:
     [Enter a description of what you did here.]
+    If there are no legal actions return none
+    Uses flipCoin to return whether to choose a random action or use what the policy
+    returns
+
     """
     """ YOUR CODE HERE """
     if len(legalActions) < 1:
@@ -147,9 +159,9 @@ class QLearningAgent(ReinforcementAgent):
 
       return action
     # util.raiseNotDefined()
-    """ END CODE """
+    # """ END CODE """
 
-    return action
+    # return action
 
   def update(self, state, action, nextState, reward):
     """
@@ -162,6 +174,8 @@ class QLearningAgent(ReinforcementAgent):
     """
     """Description:
     [Enter a description of what you did here.]
+    Finds qvalues and then returns the action associated with the next state if not
+    terminal
     """
     """ YOUR CODE HERE """
     legalActions = self.getLegalActions(state)
